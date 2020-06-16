@@ -1,5 +1,8 @@
 # Discuss
 
+
+This is a learning projekt
+
 To start your Phoenix app:
 
   * Install dependencies with `mix deps.get`
