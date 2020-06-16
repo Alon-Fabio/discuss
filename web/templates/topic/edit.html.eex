@@ -1,0 +1,13 @@
+<%= form_for @changeset, topic_path(@conn ,:update ,@topic), fn f ->%>
+    <div class="form-group">
+        <%= text_input f, :title, placeholder: "Title", class: "form-controle"%>
+        <%= error_tag f, :title%>
+    </div>
+    <%= submit "Save Topic", class: "btn btn-primary"%>
+<%end%>
+
+<div class="fixed-action-btn">
+    <%= link to: topic_path(@conn, :index), class: "btn-floating btn-large waves-effect waves-light red" do %>
+        <i class="material-icons">close</i>
+    <% end %>
+</div>
