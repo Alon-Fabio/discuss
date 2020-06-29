@@ -40,7 +40,10 @@ config :ueberauth, Ueberauth,
 #   client_id: {:system, "client_ID"},
 #   client_secret: {:system, "secret"}
 
-config :ueberauth, Ueberauth.Strategy.Github.OAuth,
-  client_id: Application.get_env(:discuss, :oauth)[:github_client_id],
-  client_secret: Application.get_env(:discuss, :oauth)[:github_client_secret]
+# config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+#   client_id: Application.get_env(:discuss, :oauth)[:github_client_id],
+#   client_secret: Application.get_env(:discuss, :oauth)[:github_client_secret]
 
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: System.get_env("GITHUB_CLIENT_ID"),
+  client_secret: System.get_env("GITHUB_CLIENT_SECRET")
