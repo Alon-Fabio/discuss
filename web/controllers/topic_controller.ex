@@ -3,14 +3,20 @@ defmodule Discuss.TopicController do
     alias Discuss.Topic
 
     plug Discuss.Plugs.RequireAuth when action in [:new, :edit, :update, :delete, :create]
-    
+    plug :check_topic_oener when action in [:edit, :update, :delete]
+
     def index(conn, _params) do
-        IO.puts("########################################################################")
-        IO.inspect(conn.assigns)
-        IO.puts("########################################################################")
+        # IO.puts("########################################################################")
+        # IO.inspect(conn)
+        # IO.puts("########################################################################")
         topics = Repo.all(Topic)
         
         render conn, "index.html", topics: topics
+    end
+        
+    def show(conn, %{"id" => topic_id}) do
+        topic = Repo.get!(Topic, topic_id)
+        render conn, "show.html", topic: topic
     end
 
     def new(conn, _params) do
@@ -20,7 +26,10 @@ defmodule Discuss.TopicController do
     end
 
     def create(conn, %{"topic" => topic}) do
-        changeset = Topic.changeset(%Topic{}, topic)
+        
+        changeset = conn.assigns.user
+            |>build_assoc(:topics) # Same as writing out of the pip|>build_assoc(conn.assigns.user, :topics)
+            |>Topic.changeset(topic) # Same as writing out of the pip|>build_assoc|>Topic.changset(%Topic{user_id: 1}, topic)
 
         case Repo.insert(changeset) do
             {:ok, _topic} -> 
@@ -68,6 +77,20 @@ defmodule Discuss.TopicController do
         
 
     end
-end
 
-# chack if there is more options to put flash than :info
+    def check_topic_oener(conn, _opt) do
+        %{params: %{"id" => topic_id}} = conn
+        if (Repo.get(Topic, topic_id) !== nil) && (Repo.get(Topic, topic_id).user_id === conn.assigns.user.id) do
+            conn
+        else
+            conn
+            |>put_flash(:warning, "This is not your topic!")
+            |>redirect(to: topic_path(conn, :index))
+            |>halt()
+        end
+        # # IO.puts("########################################################################")
+        # # IO.inspect(conn)
+        # # IO.puts("########################################################################")
+        
+    end
+end
