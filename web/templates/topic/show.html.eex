@@ -1,1 +1,11 @@
-<%= @topic.title %>
+<h4><%= @topic.title %></h4>
+
+<div id="<%= @topic.id %>_topic" class="input-field">
+    <textarea id="<%= @topic.id %>_topic_textarea" class="materialize-textearea" placeholder="What do you think?"></textarea>
+    <button id="<%= @topic.id %>_topic_btn" class="btn">Add comment</button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    window.CreateSocket(<%= @topic.id %>)
+});
+</script>
