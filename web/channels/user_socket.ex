@@ -19,9 +19,17 @@ defmodule Discuss.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
-    {:ok, socket}
+  def connect(%{"token" => token}, socket) do
+    case Phoenix.Token.verify(socket, "key", token) do
+      {:ok, user_id} ->
+        socket = assign(socket, :user_id, user_id)
+        {:ok, socket}
+      {:error, _error} ->
+        IO.puts("Fail to connect!!!!!!!!!!!")
+        :error
+    end
   end
+  
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
   #

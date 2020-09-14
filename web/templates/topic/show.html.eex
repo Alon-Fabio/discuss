@@ -1,8 +1,11 @@
-<h4><%= @topic.title %></h4>
+<h4><%= link @topic.title, to: topic_path(@conn, :show, @topic), class: "btn btn-info"%><h4>
 
 <div id="<%= @topic.id %>_topic" class="input-field">
     <textarea id="<%= @topic.id %>_topic_textarea" class="materialize-textearea" placeholder="What do you think?"></textarea>
     <button id="<%= @topic.id %>_topic_btn" class="btn">Add comment</button>
+    <ul class="collection">
+        
+    </ul>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

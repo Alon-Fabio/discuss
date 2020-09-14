@@ -3,20 +3,29 @@ defmodule Discuss.CommentsChannel do
     alias Discuss.{Topic, Comment}
 
     def join("comments:" <> topic_id ,_params ,socket) do
-        topic_it = String.to_integer(topic_id)
-        topic = Repo.get(Topic, topic_id)
-        {:ok, %{"Name: " <> topic.title =>"No: " <> topic_id }, assign(socket, :topic, topic)}
+        topic_id = String.to_integer(topic_id)
+        topic = Topic
+            |>Repo.get(topic_id)
+            |>Repo.preload(:comments)
+
+        {:ok, %{comments: topic.comments}, assign(socket, :topic, topic)}
     end
 
     def handle_in(name, %{"content" => content}, socket) do
         topic = socket.assigns.topic
+        user_id = socket.assigns.user_id
 
+        IO.puts("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        IO.inspect(user_id)
+        IO.puts("################################################################")
+        ## the code bracks if i add "user_id: user_id" that is sepused to add the user id to the DB.
         changeset = topic
-            |> build_assoc(:comments)
-            |> Comment.changeset(%{"content" => content})
+            |> build_assoc(:comments, user_id: user_id)
+            |> Comment.changeset(%{content: content})
 
         case Repo.insert(changeset) do
-            {:ok, socket} ->
+            {:ok, comment} ->
+                broadcast!(socket, "comments:#{socket.assigns.topic.id}:new", %{comment: comment})
                 {:reply, :ok, socket}
             {:error, _message} ->
                 {:reply, {:error, %{errors: changeset}}, socket}

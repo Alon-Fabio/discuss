@@ -55,16 +55,49 @@ socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
 const CreateSocket = (TopicId) => { 
+  console.log(TopicId)
   let channel = socket.channel(`comments:${TopicId}`, {})
   channel.join()
-    .receive("ok", resp => { console.log("Joined successfully", resp) })
+    .receive("ok", resp => { renderComments(resp.comments) })
     .receive("error", resp => { console.log("Unable to join", resp) })
 
     document.getElementById(`${TopicId}_topic`).querySelector('button').addEventListener('click', ()=>{
       const content = document.getElementById(`${TopicId}_topic`).querySelector('textarea').value;
+      console.log("click ", content)
       channel.push('comment:add', { content: content });
     })
+
+    channel.on(`comments:${TopicId}:new`, addComment)
     
+}
+
+function renderComments(comments) {
+  console.log(comments, " renderComments")
+  const commentsUL = document.querySelector(".collection");
+  for (let comment of comments) {
+    const li = document.createElement("li");
+    li.classList.add("collection-item");
+    li.innerText = comment.content;
+    commentsUL.append(li);
+  }
+    //Old rendering of the comments.
+  // } else {
+  //   const li = document.createElement("li")
+  //   li.classList.add("collection-item")
+  //   li.innerText = comments[comments.length - 1].content
+  //   document.querySelector('.collection').append(li)
+  //   document.querySelector('textarea').value = ""
+  // }
+}
+function addComment(event) {
+  console.log(event.comment, " addComment")
+  const commentsUL = document.querySelector(".collection");
+  const li = document.createElement("li");
+  li.classList.add("collection-item");
+  li.innerText = event.comment.content;
+  commentsUL.append(li);
+  document.querySelector('textarea').value = ""
+
 }
 
 window.CreateSocket = CreateSocket;
