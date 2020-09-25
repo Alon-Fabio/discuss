@@ -55,49 +55,82 @@ socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
 const CreateSocket = (TopicId) => { 
-  console.log(TopicId)
   let channel = socket.channel(`comments:${TopicId}`, {})
   channel.join()
-    .receive("ok", resp => { renderComments(resp.comments) })
-    .receive("error", resp => { console.log("Unable to join", resp) })
-
-    document.getElementById(`${TopicId}_topic`).querySelector('button').addEventListener('click', ()=>{
-      const content = document.getElementById(`${TopicId}_topic`).querySelector('textarea').value;
-      console.log("click ", content)
-      channel.push('comment:add', { content: content });
+    .receive('ok', resp => {
+      // console.log(resp.comments, " join")
+      renderComments(resp.comments)
     })
+    .receive('error', resp => { console.log("Unable to join", resp)
+  })
 
-    channel.on(`comments:${TopicId}:new`, addComment)
-    
+  document.getElementById(`${TopicId}_topic`).querySelector('button').addEventListener('click', ()=>{
+    const content = document.getElementById(`${TopicId}_topic`).querySelector('textarea').value;
+    // console.log("click ", content)
+    channel.push('comment:add', { content: content });
+  })
+
+  channel.on(`comments:${TopicId}:new`,renderComment)
+
+}
+
+function createDiv(text) {
+  const div = document.createElement('div')
+  div.classList.add("secondary-content")
+  div.innerText = text
+  return div
 }
 
 function renderComments(comments) {
-  console.log(comments, " renderComments")
+  // console.log(comments, " renderComments")
   const commentsUL = document.querySelector(".collection");
   for (let comment of comments) {
+    let email = 'Anonymous'
+    if (comment.user) {
+      email = comment.user.email
+    }
     const li = document.createElement("li");
     li.classList.add("collection-item");
     li.innerText = comment.content;
+    li.append(createDiv(email))
     commentsUL.append(li);
   }
-    //Old rendering of the comments.
-  // } else {
-  //   const li = document.createElement("li")
-  //   li.classList.add("collection-item")
-  //   li.innerText = comments[comments.length - 1].content
-  //   document.querySelector('.collection').append(li)
-  //   document.querySelector('textarea').value = ""
-  // }
 }
-function addComment(event) {
-  console.log(event.comment, " addComment")
+
+function renderComment(event) {
+  let email = 'Anonymous'
+  if (event.comment.user) {
+    email = event.comment.user.email
+  }
+  // console.log(event.comment, " renderComment")
   const commentsUL = document.querySelector(".collection");
   const li = document.createElement("li");
   li.classList.add("collection-item");
   li.innerText = event.comment.content;
+  li.append(createDiv(email))
   commentsUL.append(li);
   document.querySelector('textarea').value = ""
-
 }
+
+
+// function renderComments(comments) {
+//   const renderedComments = comments.map(comment => {
+//     return commentThemplate(comment)
+//   })
+//   console.log("renderedCommentsTech :", comments)
+
+//   document.querySelector('.collection').innerHTML = renderedComments.join('')
+// }
+// function renderComment(event) {
+//   console.log("renderedComment :", event)
+//   const renderedComment = commentThemplate(event.content)
+//   document.querySelector('.collection').innerHTML += renderedComment
+//   document.querySelector('textarea').value = ""
+// }
+// function commentThemplate(comment) {
+//   return `<li class="collection-item">
+//   ${comment.content}
+//   </li>`
+// }
 
 window.CreateSocket = CreateSocket;

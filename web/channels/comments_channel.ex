@@ -4,9 +4,11 @@ defmodule Discuss.CommentsChannel do
 
     def join("comments:" <> topic_id ,_params ,socket) do
         topic_id = String.to_integer(topic_id)
+        # user_id = socket.assigns.user_id
+        
         topic = Topic
             |>Repo.get(topic_id)
-            |>Repo.preload(:comments)
+            |>Repo.preload(comments: [:user])
 
         {:ok, %{comments: topic.comments}, assign(socket, :topic, topic)}
     end
@@ -15,16 +17,13 @@ defmodule Discuss.CommentsChannel do
         topic = socket.assigns.topic
         user_id = socket.assigns.user_id
 
-        IO.puts("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        IO.inspect(user_id)
-        IO.puts("################################################################")
-        ## the code bracks if i add "user_id: user_id" that is sepused to add the user id to the DB.
         changeset = topic
             |> build_assoc(:comments, user_id: user_id)
             |> Comment.changeset(%{content: content})
 
         case Repo.insert(changeset) do
             {:ok, comment} ->
+                comment = Repo.preload(comment, :user)
                 broadcast!(socket, "comments:#{socket.assigns.topic.id}:new", %{comment: comment})
                 {:reply, :ok, socket}
             {:error, _message} ->
