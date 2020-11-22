@@ -20,9 +20,6 @@ defmodule Discuss.AuthController do
     end
 
     defp signin(conn, params) do
-        # IO.puts("################################################")
-        # IO.inspect()
-        # IO.puts("################################################")
         case insert_or_update_user(params) do
             {:ok, user} ->
                 conn
